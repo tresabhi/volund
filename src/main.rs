@@ -1,9 +1,9 @@
-#![allow(
-  dead_code,
-  unused_variables,
-  clippy::too_many_arguments,
-  clippy::unnecessary_wraps
-)]
+// #![allow(
+//   dead_code,
+//   unused_variables,
+//   clippy::too_many_arguments,
+//   clippy::unnecessary_wraps
+// )]
 
 use anyhow::{anyhow, Result};
 use log::*;
@@ -11,29 +11,12 @@ use vulkanalia::loader::{LibloadingLoader, LIBRARY};
 use vulkanalia::prelude::v1_0::*;
 // TODO: update to latest prelude
 use vulkanalia::window::{self as vk_window, get_required_instance_extensions};
+use vulkanalia::Version;
 use winit::dpi::LogicalSize;
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Icon;
 use winit::window::{Window, WindowBuilder}; // TODO: update winit to the latest version
-
-unsafe fn create_instance(window: &Window, entry: &Entry) -> Result<Instance> {
-  let application_info = vk::ApplicationInfo::builder()
-    .application_name(b"Volund\0")
-    .application_version(vk::make_version(1, 0, 0))
-    .engine_name(b"Apollo\0")
-    .engine_version(vk::make_version(1, 0, 0))
-    .api_version(vk::make_version(1, 1, 0));
-  let extensions = vk_window::get_required_instance_extensions(window)
-    .iter()
-    .map(|e| e.as_ptr())
-    .collect::<Vec<_>>();
-  let info = vk::InstanceCreateInfo::builder()
-    .application_info(&application_info)
-    .enabled_extension_names(&extensions);
-
-  Ok(entry.create_instance(&info, None)?)
-}
 
 fn main() -> Result<()> {
   pretty_env_logger::init();
@@ -80,7 +63,24 @@ fn main() -> Result<()> {
   Ok(())
 }
 
-/// Our Vulkan app.
+unsafe fn create_instance(window: &Window, entry: &Entry) -> Result<Instance> {
+  let application_info = vk::ApplicationInfo::builder()
+    .application_name(b"Volund\0")
+    .application_version(vk::make_version(1, 0, 0))
+    .engine_name(b"Apollo\0")
+    .engine_version(vk::make_version(1, 0, 0))
+    .api_version(vk::make_version(1, 1, 0));
+  let extensions = vk_window::get_required_instance_extensions(window)
+    .iter()
+    .map(|e| e.as_ptr())
+    .collect::<Vec<_>>();
+  let info = vk::InstanceCreateInfo::builder()
+    .application_info(&application_info)
+    .enabled_extension_names(&extensions);
+
+  Ok(entry.create_instance(&info, None)?)
+}
+
 #[derive(Clone, Debug)]
 struct App {
   entry: Entry,
