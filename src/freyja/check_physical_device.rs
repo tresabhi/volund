@@ -3,7 +3,10 @@ use vulkanalia::prelude::v1_0::*; // TODO: update to latest prelude
 
 use crate::freyja::suitability_error::SuitabilityError;
 
-use super::{app_data::AppData, queue_family_indices::QueueFamilyIndices};
+use super::{
+  app_data::AppData, check_physical_device_extensions::check_physical_device_extensions,
+  queue_family_indices::QueueFamilyIndices,
+};
 
 pub unsafe fn check_physical_device(
   instance: &Instance,
@@ -26,6 +29,7 @@ pub unsafe fn check_physical_device(
   }
 
   QueueFamilyIndices::get(instance, data, physical_device)?;
+  check_physical_device_extensions(instance, physical_device)?;
 
   Ok(())
 }

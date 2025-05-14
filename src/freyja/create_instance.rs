@@ -11,7 +11,7 @@ use winit::window::Window;
 use crate::freyja::validation_layer::VALIDATION_LAYER;
 
 use super::app_data::AppData;
-use super::debug_callback::{self, debug_callback};
+use super::debug_callback::debug_callback;
 use super::portability_macos_version::PORTABILITY_MACOS_VERSION;
 use super::validation_enabled::VALIDATION_ENABLED;
 

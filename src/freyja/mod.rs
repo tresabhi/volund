@@ -1,9 +1,11 @@
 pub mod app;
 pub mod app_data;
 pub mod check_physical_device;
+pub mod check_physical_device_extensions;
 pub mod create_instance;
 pub mod create_logical_device;
 pub mod debug_callback;
+pub mod device_extensions;
 pub mod mount;
 pub mod pick_physical_device;
 pub mod portability_macos_version;

@@ -1,5 +1,4 @@
 use anyhow::Result;
-use vulkanalia::Version;
 use winit::event::{Event, WindowEvent};
 use winit::window::Icon;
 use winit::{dpi::LogicalSize, event_loop::EventLoop, window::WindowBuilder};
