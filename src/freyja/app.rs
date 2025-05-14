@@ -11,6 +11,7 @@ use winit::window::Window;
 
 use super::create_logical_device::create_logical_device;
 use super::create_swapchain::create_swapchain;
+use super::create_swapchain_image_views::create_swapchain_image_views;
 use super::pick_physical_device::pick_physical_device;
 use super::validation_enabled::VALIDATION_ENABLED;
 use super::{app_data::AppData, create_instance::create_instance};
@@ -36,6 +37,7 @@ impl App {
     let device = create_logical_device(&entry, &instance, &mut data)?;
 
     create_swapchain(window, &instance, &device, &mut data)?;
+    create_swapchain_image_views(&device, &mut data)?;
 
     Ok(Self {
       entry,
@@ -50,6 +52,11 @@ impl App {
   }
 
   pub unsafe fn destroy(&mut self) {
+    self
+      .data
+      .swapchain_image_views
+      .iter()
+      .for_each(|v| self.device.destroy_image_view(*v, None));
     self.device.destroy_swapchain_khr(self.data.swapchain, None);
     self.device.destroy_device(None);
     self.instance.destroy_surface_khr(self.data.surface, None);

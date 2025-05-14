@@ -5,6 +5,7 @@ pub mod check_physical_device_extensions;
 pub mod create_instance;
 pub mod create_logical_device;
 pub mod create_swapchain;
+pub mod create_swapchain_image_views;
 pub mod debug_callback;
 pub mod device_extensions;
 pub mod get_swapchain_extent;

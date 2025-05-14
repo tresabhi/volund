@@ -4,6 +4,7 @@
     "KHRONOS",
     "Libloading",
     "SRGB",
+    "subresource",
     "SWAPCHAIN",
     "thiserror",
     "Volund",
