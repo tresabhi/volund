@@ -6,6 +6,8 @@ pub mod create_instance;
 pub mod create_logical_device;
 pub mod debug_callback;
 pub mod device_extensions;
+pub mod get_swapchain_extent;
+pub mod get_swapchain_present_mode;
 pub mod get_swapchain_surface_format;
 pub mod mount;
 pub mod pick_physical_device;
