@@ -4,10 +4,13 @@
     "glslc",
     "KHRONOS",
     "Libloading",
+    "multisample",
+    "rasterizer",
     "SRGB",
     "subresource",
     "SWAPCHAIN",
     "thiserror",
+    "viewports",
     "Volund",
     "vulkanalia",
     "winit"
