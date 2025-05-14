@@ -14,6 +14,7 @@ use std::os::raw::c_void;
 use thiserror::Error;
 use vulkanalia::loader::{LibloadingLoader, LIBRARY};
 use vulkanalia::prelude::v1_0::*; // TODO: update to latest prelude
+use vulkanalia::vk::KhrSurfaceExtension;
 use vulkanalia::vk::{DebugUtilsMessageSeverityFlagsEXT, ExtExtendedDynamicState3Extension};
 use vulkanalia::vk::{ExtDebugUtilsExtension, LayerProperties};
 use vulkanalia::window::{self as vk_window, get_required_instance_extensions};
@@ -49,26 +50,20 @@ fn main() -> Result<()> {
   };
   window.set_window_icon(Some(icon));
 
-  // App
   let mut app = unsafe { App::create(&window)? };
-  event_loop.run(move |event, elwt| {
-    match event {
-      // Request a redraw when all events were processed.
-      Event::AboutToWait => window.request_redraw(),
-      Event::WindowEvent { event, .. } => match event {
-        // Render a frame if our Vulkan app is not being destroyed.
-        WindowEvent::RedrawRequested if !elwt.exiting() => unsafe { app.render(&window) }.unwrap(),
-        // Destroy our Vulkan app.
-        WindowEvent::CloseRequested => {
-          elwt.exit();
-          unsafe {
-            app.destroy();
-          }
+  event_loop.run(move |event, elwt| match event {
+    Event::AboutToWait => window.request_redraw(),
+    Event::WindowEvent { event, .. } => match event {
+      WindowEvent::RedrawRequested if !elwt.exiting() => unsafe { app.render(&window) }.unwrap(),
+      WindowEvent::CloseRequested => {
+        elwt.exit();
+        unsafe {
+          app.destroy();
         }
-        _ => {}
-      },
+      }
       _ => {}
-    }
+    },
+    _ => {}
   })?;
 
   Ok(())
@@ -80,15 +75,27 @@ unsafe fn create_logical_device(
   data: &mut AppData,
 ) -> Result<Device> {
   let indices = QueueFamilyIndices::get(instance, data, data.physical_device)?;
+  let mut unique_indices = HashSet::new();
+
+  unique_indices.insert(indices.graphics);
+  unique_indices.insert(indices.present);
+
   let queue_priorities = &[1.0];
-  let queue_info = vk::DeviceQueueCreateInfo::builder()
-    .queue_family_index(indices.graphics)
-    .queue_priorities(queue_priorities);
+  let queue_infos = unique_indices
+    .iter()
+    .map(|i| {
+      vk::DeviceQueueCreateInfo::builder()
+        .queue_family_index(*i)
+        .queue_priorities(queue_priorities)
+    })
+    .collect::<Vec<_>>();
+
   let layers = if VALIDATION_ENABLED {
     vec![VALIDATION_LAYER.as_ptr()]
   } else {
     vec![]
   };
+
   let mut extensions = vec![];
 
   if cfg!(target_os = "macos") && entry.version()? >= PORTABILITY_MACOS_VERSION {
@@ -96,15 +103,14 @@ unsafe fn create_logical_device(
   }
 
   let features = vk::PhysicalDeviceFeatures::builder();
-  let queue_infos = &[queue_info];
   let info = vk::DeviceCreateInfo::builder()
-    .queue_create_infos(queue_infos)
+    .queue_create_infos(&queue_infos)
     .enabled_layer_names(&layers)
     .enabled_extension_names(&extensions)
     .enabled_features(&features);
   let device = instance.create_device(data.physical_device, &info, None)?;
 
-  data.graphics_queue = device.get_device_queue(indices.graphics, 0);
+  data.present_queue = device.get_device_queue(indices.present, 0);
 
   Ok(device)
 }
@@ -112,6 +118,7 @@ unsafe fn create_logical_device(
 #[derive(Copy, Clone, Debug)]
 struct QueueFamilyIndices {
   graphics: u32,
+  present: u32,
 }
 
 impl QueueFamilyIndices {
@@ -125,9 +132,21 @@ impl QueueFamilyIndices {
       .iter()
       .position(|p| p.queue_flags.contains(vk::QueueFlags::GRAPHICS))
       .map(|i| i as u32);
+    let mut present = None;
 
-    if let Some(graphics) = graphics {
-      Ok(Self { graphics })
+    for (index, properties) in properties.iter().enumerate() {
+      if instance.get_physical_device_surface_support_khr(
+        physical_device,
+        index as u32,
+        data.surface,
+      )? {
+        present = Some(index as u32);
+        break;
+      }
+    }
+
+    if let (Some(graphics), Some(present)) = (graphics, present) {
+      Ok(Self { graphics, present })
     } else {
       Err(anyhow!(SuitabilityError(
         "Missing required queue families."
@@ -145,7 +164,7 @@ unsafe fn pick_physical_device(instance: &Instance, data: &mut AppData) -> Resul
     let properties = instance.get_physical_device_properties(physical_device);
 
     if let Err(error) = check_physical_device(instance, data, physical_device) {
-      // reconsider this
+      // TODO: reconsider this
       warn!(
         "Skipping physical device (`{}`): {}",
         properties.device_name, error
@@ -294,6 +313,7 @@ impl App {
     let mut data = AppData::default();
     let instance = create_instance(window, &entry, &mut data)?;
 
+    data.surface = vk_window::create_surface(&instance, &window, &window)?;
     pick_physical_device(&instance, &mut data)?;
 
     let device = create_logical_device(&entry, &instance, &mut data)?;
@@ -306,12 +326,10 @@ impl App {
     })
   }
 
-  /// Renders a frame for our Vulkan app.
   unsafe fn render(&mut self, window: &Window) -> Result<()> {
     Ok(())
   }
 
-  /// Destroys our Vulkan app.
   unsafe fn destroy(&mut self) {
     if VALIDATION_ENABLED {
       self
@@ -320,14 +338,16 @@ impl App {
     }
 
     self.instance.destroy_instance(None);
+    self.instance.destroy_surface_khr(self.data.surface, None);
     self.device.destroy_device(None);
   }
 }
 
-/// The Vulkan handles and associated properties used by our Vulkan app.
 #[derive(Clone, Debug, Default)]
 struct AppData {
   messenger: vk::DebugUtilsMessengerEXT,
   physical_device: vk::PhysicalDevice,
   graphics_queue: vk::Queue,
+  surface: vk::SurfaceKHR,
+  present_queue: vk::Queue,
 }
