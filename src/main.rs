@@ -89,13 +89,11 @@ unsafe fn create_logical_device(
         .queue_priorities(queue_priorities)
     })
     .collect::<Vec<_>>();
-
   let layers = if VALIDATION_ENABLED {
     vec![VALIDATION_LAYER.as_ptr()]
   } else {
     vec![]
   };
-
   let mut extensions = vec![];
 
   if cfg!(target_os = "macos") && entry.version()? >= PORTABILITY_MACOS_VERSION {
@@ -110,6 +108,7 @@ unsafe fn create_logical_device(
     .enabled_features(&features);
   let device = instance.create_device(data.physical_device, &info, None)?;
 
+  data.graphics_queue = device.get_device_queue(indices.graphics, 0);
   data.present_queue = device.get_device_queue(indices.present, 0);
 
   Ok(device)
