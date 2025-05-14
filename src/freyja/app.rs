@@ -56,6 +56,7 @@ impl App {
   }
 
   pub unsafe fn destroy(&mut self) {
+    self.device.destroy_pipeline(self.data.pipeline, None);
     self
       .device
       .destroy_pipeline_layout(self.data.pipeline_layout, None);

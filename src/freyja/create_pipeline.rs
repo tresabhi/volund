@@ -1,6 +1,6 @@
 use anyhow::Result;
 use vulkanalia::{
-  vk::{self, DeviceV1_0, HasBuilder},
+  vk::{self, DeviceV1_0, Handle, HasBuilder},
   Device,
 };
 
@@ -22,7 +22,7 @@ pub unsafe fn create_pipeline(device: &Device, data: &mut AppData) -> Result<()>
     .module(frag_shader_module)
     .name(b"main\0");
 
-  let vertex_input_state = vk::PipelineViewportStateCreateInfo::builder();
+  let vertex_input_state = vk::PipelineVertexInputStateCreateInfo::builder();
   let input_assembly_state = vk::PipelineInputAssemblyStateCreateInfo::builder()
     .topology(vk::PrimitiveTopology::TRIANGLE_LIST)
     .primitive_restart_enable(false);
@@ -78,6 +78,23 @@ pub unsafe fn create_pipeline(device: &Device, data: &mut AppData) -> Result<()>
 
   device.destroy_shader_module(vert_shader_module, None);
   device.destroy_shader_module(frag_shader_module, None);
+
+  let stages = &[vert_stage, frag_stage];
+  let info = vk::GraphicsPipelineCreateInfo::builder()
+    .stages(stages)
+    .vertex_input_state(&vertex_input_state)
+    .input_assembly_state(&input_assembly_state)
+    .viewport_state(&viewport_state)
+    .rasterization_state(&rasterization_state)
+    .multisample_state(&multisample_state)
+    .color_blend_state(&color_blend_state)
+    .layout(data.pipeline_layout)
+    .render_pass(data.render_pass)
+    .subpass(0);
+
+  data.pipeline = device
+    .create_graphics_pipelines(vk::PipelineCache::null(), &[info], None)?
+    .0[0];
 
   Ok(())
 }
