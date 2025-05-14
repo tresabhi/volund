@@ -3,6 +3,7 @@
     "elwt",
     "KHRONOS",
     "Libloading",
+    "thiserror",
     "Volund",
     "vulkanalia",
     "winit"
