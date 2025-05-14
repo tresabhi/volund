@@ -1,5 +1,6 @@
 {
   "cSpell.words": [
+    "DONT",
     "elwt",
     "glslc",
     "KHRONOS",
@@ -7,6 +8,8 @@
     "multisample",
     "rasterizer",
     "SRGB",
+    "Subpass",
+    "subpasses",
     "subresource",
     "SWAPCHAIN",
     "thiserror",

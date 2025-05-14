@@ -5,6 +5,7 @@ pub mod check_physical_device_extensions;
 pub mod create_instance;
 pub mod create_logical_device;
 pub mod create_pipeline;
+pub mod create_render_pass;
 pub mod create_shader_module;
 pub mod create_swapchain;
 pub mod create_swapchain_image_views;

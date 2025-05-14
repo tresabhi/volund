@@ -11,6 +11,7 @@ use winit::window::Window;
 
 use super::create_logical_device::create_logical_device;
 use super::create_pipeline::create_pipeline;
+use super::create_render_pass::{self, create_render_pass};
 use super::create_swapchain::create_swapchain;
 use super::create_swapchain_image_views::create_swapchain_image_views;
 use super::pick_physical_device::pick_physical_device;
@@ -39,6 +40,7 @@ impl App {
 
     create_swapchain(window, &instance, &device, &mut data)?;
     create_swapchain_image_views(&device, &mut data)?;
+    create_render_pass(&instance, &device, &mut data)?;
     create_pipeline(&device, &mut data)?;
 
     Ok(Self {
@@ -57,6 +59,11 @@ impl App {
     self
       .device
       .destroy_pipeline_layout(self.data.pipeline_layout, None);
+    self.device.destroy_render_pass(self.data.render_pass, None);
+    self
+      .device
+      .destroy_pipeline_layout(self.data.pipeline_layout, None);
+
     self
       .data
       .swapchain_image_views
@@ -64,6 +71,7 @@ impl App {
       .for_each(|v| self.device.destroy_image_view(*v, None));
     self.device.destroy_swapchain_khr(self.data.swapchain, None);
     self.device.destroy_device(None);
+
     self.instance.destroy_surface_khr(self.data.surface, None);
 
     if VALIDATION_ENABLED {
