@@ -10,6 +10,7 @@ use vulkanalia::{
 use winit::window::Window;
 
 use super::create_logical_device::create_logical_device;
+use super::create_pipeline::create_pipeline;
 use super::create_swapchain::create_swapchain;
 use super::create_swapchain_image_views::create_swapchain_image_views;
 use super::pick_physical_device::pick_physical_device;
@@ -38,6 +39,7 @@ impl App {
 
     create_swapchain(window, &instance, &device, &mut data)?;
     create_swapchain_image_views(&device, &mut data)?;
+    create_pipeline(&device, &mut data)?;
 
     Ok(Self {
       entry,
