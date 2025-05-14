@@ -9,8 +9,9 @@ use vulkanalia::{
 use crate::freyja::validation_layer::VALIDATION_LAYER;
 
 use super::{
-  app_data::AppData, portability_macos_version::PORTABILITY_MACOS_VERSION,
-  queue_family_indices::QueueFamilyIndices, validation_enabled::VALIDATION_ENABLED,
+  app_data::AppData, device_extensions::DEVICE_EXTENSIONS,
+  portability_macos_version::PORTABILITY_MACOS_VERSION, queue_family_indices::QueueFamilyIndices,
+  validation_enabled::VALIDATION_ENABLED,
 };
 
 pub unsafe fn create_logical_device(
@@ -38,7 +39,10 @@ pub unsafe fn create_logical_device(
   } else {
     vec![]
   };
-  let mut extensions = vec![];
+  let mut extensions = DEVICE_EXTENSIONS
+    .iter()
+    .map(|n| n.as_ptr())
+    .collect::<Vec<_>>();
 
   if cfg!(target_os = "macos") && entry.version()? >= PORTABILITY_MACOS_VERSION {
     extensions.push(vk::KHR_PORTABILITY_SUBSET_EXTENSION.name.as_ptr());

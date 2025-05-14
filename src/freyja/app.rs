@@ -47,6 +47,7 @@ impl App {
   }
 
   pub unsafe fn destroy(&mut self) {
+    self.device.destroy_swapchain_khr(self.data.swapchain, None);
     self.device.destroy_device(None);
     self.instance.destroy_surface_khr(self.data.surface, None);
 
