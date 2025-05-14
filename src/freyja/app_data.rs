@@ -8,4 +8,7 @@ pub struct AppData {
   pub surface: vk::SurfaceKHR,
   pub present_queue: vk::Queue,
   pub swapchain: vk::SwapchainKHR,
+  pub swapchain_images: Vec<vk::Image>,
+  pub swapchain_format: vk::Format,
+  pub swapchain_extent: vk::Extent2D,
 }
