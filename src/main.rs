@@ -13,7 +13,7 @@ use std::ffi::CStr;
 use std::os::raw::c_void;
 use vulkanalia::loader::{LibloadingLoader, LIBRARY};
 use vulkanalia::prelude::v1_0::*; // TODO: update to latest prelude
-use vulkanalia::vk::ExtExtendedDynamicState3Extension;
+use vulkanalia::vk::{DebugUtilsMessageSeverityFlagsEXT, ExtExtendedDynamicState3Extension};
 use vulkanalia::vk::{ExtDebugUtilsExtension, LayerProperties};
 use vulkanalia::window::{self as vk_window, get_required_instance_extensions};
 use vulkanalia::Version;
@@ -116,23 +116,27 @@ unsafe fn create_instance(window: &Window, entry: &Entry, data: &mut AppData) ->
   } else {
     Vec::new()
   };
-  let info = vk::InstanceCreateInfo::builder()
+  let mut info = vk::InstanceCreateInfo::builder()
     .application_info(&application_info)
     .enabled_layer_names(&layers)
     .enabled_extension_names(&extensions)
     .flags(flags);
+  let mut debug_info = vk::DebugUtilsMessengerCreateInfoEXT::builder()
+    .message_severity(vk::DebugUtilsMessageSeverityFlagsEXT::all())
+    .message_type(
+      vk::DebugUtilsMessageTypeFlagsEXT::GENERAL
+        | vk::DebugUtilsMessageTypeFlagsEXT::VALIDATION
+        | vk::DebugUtilsMessageTypeFlagsEXT::PERFORMANCE,
+    )
+    .user_callback(Some(debug_callback));
+
+  if VALIDATION_ENABLED {
+    info = info.push_next(&mut debug_info);
+  }
+
   let instance = entry.create_instance(&info, None)?;
 
   if VALIDATION_ENABLED {
-    let debug_info = vk::DebugUtilsMessengerCreateInfoEXT::builder()
-      .message_severity(vk::DebugUtilsMessageSeverityFlagsEXT::all())
-      .message_type(
-        vk::DebugUtilsMessageTypeFlagsEXT::GENERAL
-          | vk::DebugUtilsMessageTypeFlagsEXT::VALIDATION
-          | vk::DebugUtilsMessageTypeFlagsEXT::PERFORMANCE,
-      )
-      .user_callback(Some(debug_callback));
-
     data.messenger = instance.create_debug_utils_messenger_ext(&debug_info, None)?;
   }
 
