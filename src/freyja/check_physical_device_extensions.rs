@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use anyhow::{anyhow, Ok, Result};
+use anyhow::{anyhow, Result};
 use vulkanalia::{
   vk::{self, InstanceV1_0},
   Instance,

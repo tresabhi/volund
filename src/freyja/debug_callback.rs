@@ -1,6 +1,7 @@
-use log::{debug, error, trace, warn};
 use std::ffi::CStr;
 use std::os::raw::c_void;
+
+use log::{debug, error, trace, warn};
 use vulkanalia::vk;
 
 pub extern "system" fn debug_callback(
