@@ -8,7 +8,7 @@ use super::app_data::AppData;
 
 #[derive(Clone, Debug)]
 pub struct SwapchainSupport {
-  capabilities: vk::SurfaceCapabilitiesKHR,
+  pub capabilities: vk::SurfaceCapabilitiesKHR,
   pub formats: Vec<vk::SurfaceFormatKHR>,
   pub present_modes: Vec<vk::PresentModeKHR>,
 }

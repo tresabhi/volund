@@ -10,6 +10,7 @@ use vulkanalia::{
 use winit::window::Window;
 
 use super::create_logical_device::create_logical_device;
+use super::create_swapchain::create_swapchain;
 use super::pick_physical_device::pick_physical_device;
 use super::validation_enabled::VALIDATION_ENABLED;
 use super::{app_data::AppData, create_instance::create_instance};
@@ -33,6 +34,8 @@ impl App {
     pick_physical_device(&instance, &mut data)?;
 
     let device = create_logical_device(&entry, &instance, &mut data)?;
+
+    create_swapchain(window, &instance, &device, &mut data)?;
 
     Ok(Self {
       entry,

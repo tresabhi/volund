@@ -7,4 +7,5 @@ pub struct AppData {
   pub graphics_queue: vk::Queue,
   pub surface: vk::SurfaceKHR,
   pub present_queue: vk::Queue,
+  pub swapchain: vk::SwapchainKHR,
 }
