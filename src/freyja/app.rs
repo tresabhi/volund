@@ -1,5 +1,7 @@
 use anyhow::{anyhow, Ok, Result};
-use vulkanalia::vk::{DeviceV1_0, ExtDebugUtilsExtension, InstanceV1_0, KhrSurfaceExtension};
+use vulkanalia::vk::{
+  DeviceV1_0, ExtDebugUtilsExtension, InstanceV1_0, KhrSurfaceExtension, KhrSwapchainExtension,
+};
 use vulkanalia::window::{self as vk_window};
 use vulkanalia::{
   loader::{LibloadingLoader, LIBRARY},
@@ -45,6 +47,9 @@ impl App {
   }
 
   pub unsafe fn destroy(&mut self) {
+    self.device.destroy_device(None);
+    self.instance.destroy_surface_khr(self.data.surface, None);
+
     if VALIDATION_ENABLED {
       self
         .instance
@@ -52,7 +57,5 @@ impl App {
     }
 
     self.instance.destroy_instance(None);
-    self.instance.destroy_surface_khr(self.data.surface, None);
-    self.device.destroy_device(None);
   }
 }
