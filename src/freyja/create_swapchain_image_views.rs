@@ -16,12 +16,14 @@ pub unsafe fn create_swapchain_image_views(device: &Device, data: &mut AppData) 
         .g(vk::ComponentSwizzle::IDENTITY)
         .b(vk::ComponentSwizzle::IDENTITY)
         .a(vk::ComponentSwizzle::IDENTITY);
+
       let subresource_range = vk::ImageSubresourceRange::builder()
         .aspect_mask(vk::ImageAspectFlags::COLOR)
         .base_mip_level(0)
         .level_count(1)
         .base_array_layer(0)
         .layer_count(1);
+
       let info = vk::ImageViewCreateInfo::builder()
         .image(*i)
         .view_type(vk::ImageViewType::_2D)

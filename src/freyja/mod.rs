@@ -18,6 +18,7 @@ pub mod device_extensions;
 pub mod get_swapchain_extent;
 pub mod get_swapchain_present_mode;
 pub mod get_swapchain_surface_format;
+pub mod max_frames_in_flight;
 pub mod mount;
 pub mod pick_physical_device;
 pub mod portability_macos_version;

@@ -12,9 +12,8 @@ pub unsafe fn create_command_pool(
   data: &mut AppData,
 ) -> Result<()> {
   let indices = QueueFamilyIndices::get(instance, data, data.physical_device)?;
-  let info = vk::CommandPoolCreateInfo::builder()
-    .flags(vk::CommandPoolCreateFlags::empty())
-    .queue_family_index(indices.graphics);
+
+  let info = vk::CommandPoolCreateInfo::builder().queue_family_index(indices.graphics);
 
   data.command_pool = device.create_command_pool(&info, None)?;
 

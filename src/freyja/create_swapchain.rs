@@ -20,24 +20,29 @@ pub unsafe fn create_swapchain(
 ) -> Result<()> {
   let indices = QueueFamilyIndices::get(instance, data, data.physical_device)?;
   let support = SwapchainSupport::get(instance, data, data.physical_device)?;
+
   let surface_format = get_swapchain_surface_format(&support.formats);
   let present_mode = get_swapchain_present_mode(&support.present_modes);
   let extent = get_swapchain_extent(window, support.capabilities);
-  let mut image_count = support.capabilities.min_image_count + 1;
 
+  data.swapchain_format = surface_format.format;
+  data.swapchain_extent = extent;
+
+  let mut image_count = support.capabilities.min_image_count + 1;
   if support.capabilities.max_image_count != 0 && image_count > support.capabilities.max_image_count
   {
     image_count = support.capabilities.max_image_count;
   }
 
   let mut queue_family_indices = vec![];
-  let image_sharing_mode = if indices.graphics == indices.present {
-    vk::SharingMode::EXCLUSIVE
-  } else {
+  let image_sharing_mode = if indices.graphics != indices.present {
     queue_family_indices.push(indices.graphics);
     queue_family_indices.push(indices.present);
     vk::SharingMode::CONCURRENT
+  } else {
+    vk::SharingMode::EXCLUSIVE
   };
+
   let info = vk::SwapchainCreateInfoKHR::builder()
     .surface(data.surface)
     .min_image_count(image_count)
@@ -56,8 +61,6 @@ pub unsafe fn create_swapchain(
 
   data.swapchain = device.create_swapchain_khr(&info, None)?;
   data.swapchain_images = device.get_swapchain_images_khr(data.swapchain)?;
-  data.swapchain_format = surface_format.format;
-  data.swapchain_extent = extent;
 
   Ok(())
 }

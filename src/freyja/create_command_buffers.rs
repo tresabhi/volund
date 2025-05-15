@@ -43,7 +43,6 @@ pub unsafe fn create_command_buffers(device: &Device, data: &mut AppData) -> Res
       data.pipeline,
     );
     device.cmd_draw(*command_buffer, 3, 1, 0, 0);
-
     device.cmd_end_render_pass(*command_buffer);
     device.end_command_buffer(*command_buffer)?;
   }
