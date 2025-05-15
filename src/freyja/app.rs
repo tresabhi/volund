@@ -9,6 +9,7 @@ use vulkanalia::{
 };
 use winit::window::Window;
 
+use super::create_framebuffers::create_framebuffers;
 use super::create_logical_device::create_logical_device;
 use super::create_pipeline::create_pipeline;
 use super::create_render_pass::{self, create_render_pass};
@@ -42,6 +43,7 @@ impl App {
     create_swapchain_image_views(&device, &mut data)?;
     create_render_pass(&instance, &device, &mut data)?;
     create_pipeline(&device, &mut data)?;
+    create_framebuffers(&device, &mut data)?;
 
     Ok(Self {
       entry,
@@ -56,6 +58,12 @@ impl App {
   }
 
   pub unsafe fn destroy(&mut self) {
+    self
+      .data
+      .framebuffers
+      .iter()
+      .for_each(|f| self.device.destroy_framebuffer(*f, None));
+
     self.device.destroy_pipeline(self.data.pipeline, None);
     self
       .device

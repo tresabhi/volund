@@ -2,6 +2,7 @@ pub mod app;
 pub mod app_data;
 pub mod check_physical_device;
 pub mod check_physical_device_extensions;
+pub mod create_framebuffers;
 pub mod create_instance;
 pub mod create_logical_device;
 pub mod create_pipeline;
