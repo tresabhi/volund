@@ -9,6 +9,8 @@ use vulkanalia::{
 };
 use winit::window::Window;
 
+use super::create_command_buffers::create_command_buffers;
+use super::create_command_pool::create_command_pool;
 use super::create_framebuffers::create_framebuffers;
 use super::create_logical_device::create_logical_device;
 use super::create_pipeline::create_pipeline;
@@ -44,6 +46,8 @@ impl App {
     create_render_pass(&instance, &device, &mut data)?;
     create_pipeline(&device, &mut data)?;
     create_framebuffers(&device, &mut data)?;
+    create_command_pool(&instance, &device, &mut data)?;
+    create_command_buffers(&device, &mut data)?;
 
     Ok(Self {
       entry,
@@ -58,6 +62,10 @@ impl App {
   }
 
   pub unsafe fn destroy(&mut self) {
+    self
+      .device
+      .destroy_command_pool(self.data.command_pool, None);
+
     self
       .data
       .framebuffers
