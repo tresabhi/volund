@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Ok, Result};
 use vulkanalia::vk::{
-  DeviceV1_0, ExtDebugUtilsExtension, InstanceV1_0, KhrSurfaceExtension, KhrSwapchainExtension,
+  self, DeviceV1_0, ExtDebugUtilsExtension, Handle, HasBuilder, InstanceV1_0, KhrSurfaceExtension,
+  KhrSwapchainExtension,
 };
 use vulkanalia::window::{self as vk_window};
 use vulkanalia::{
@@ -14,9 +15,10 @@ use super::create_command_pool::create_command_pool;
 use super::create_framebuffers::create_framebuffers;
 use super::create_logical_device::create_logical_device;
 use super::create_pipeline::create_pipeline;
-use super::create_render_pass::{self, create_render_pass};
+use super::create_render_pass::create_render_pass;
 use super::create_swapchain::create_swapchain;
 use super::create_swapchain_image_views::create_swapchain_image_views;
+use super::create_sync_objects::create_sync_objects;
 use super::pick_physical_device::pick_physical_device;
 use super::validation_enabled::VALIDATION_ENABLED;
 use super::{app_data::AppData, create_instance::create_instance};
@@ -48,6 +50,7 @@ impl App {
     create_framebuffers(&device, &mut data)?;
     create_command_pool(&instance, &device, &mut data)?;
     create_command_buffers(&device, &mut data)?;
+    create_sync_objects(&device, &mut data)?;
 
     Ok(Self {
       entry,
@@ -58,10 +61,50 @@ impl App {
   }
 
   pub unsafe fn render(&mut self, window: &Window) -> Result<()> {
+    let image_index = self
+      .device
+      .acquire_next_image_khr(
+        self.data.swapchain,
+        u64::MAX,
+        self.data.image_available_semaphore,
+        vk::Fence::null(),
+      )?
+      .0 as usize;
+    let wait_semaphores = &[self.data.image_available_semaphore];
+    let wait_stages = &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
+    let command_buffers = &[self.data.command_buffers[image_index as usize]];
+    let signal_semaphores = &[self.data.render_finished_semaphore];
+    let submit_info = vk::SubmitInfo::builder()
+      .wait_semaphores(wait_semaphores)
+      .wait_dst_stage_mask(wait_stages)
+      .command_buffers(command_buffers)
+      .signal_semaphores(signal_semaphores);
+
+    self
+      .device
+      .queue_submit(self.data.graphics_queue, &[submit_info], vk::Fence::null())?;
+
+    let swapchains = &[self.data.swapchain];
+    let image_indices = &[image_index as u32];
+    let present_info = vk::PresentInfoKHR::builder()
+      .wait_semaphores(signal_semaphores)
+      .swapchains(swapchains)
+      .image_indices(image_indices);
+
+    self
+      .device
+      .queue_present_khr(self.data.present_queue, &present_info)?;
+
     Ok(())
   }
 
   pub unsafe fn destroy(&mut self) {
+    self
+      .device
+      .destroy_semaphore(self.data.render_finished_semaphore, None);
+    self
+      .device
+      .destroy_semaphore(self.data.image_available_semaphore, None);
     self
       .device
       .destroy_command_pool(self.data.command_pool, None);

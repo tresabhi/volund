@@ -12,6 +12,7 @@ pub mod create_render_pass;
 pub mod create_shader_module;
 pub mod create_swapchain;
 pub mod create_swapchain_image_views;
+pub mod create_sync_objects;
 pub mod debug_callback;
 pub mod device_extensions;
 pub mod get_swapchain_extent;
