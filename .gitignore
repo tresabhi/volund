@@ -5,3 +5,5 @@ target/
 *.pdb
 
 *.spv
+
+test.*

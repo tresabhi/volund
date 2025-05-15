@@ -3,6 +3,7 @@
     "DONT",
     "elwt",
     "framebuffers",
+    "glsl",
     "glslc",
     "KHRONOS",
     "Libloading",
